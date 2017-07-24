@@ -151,10 +151,14 @@ class HrExpenseExpense(osv.Model):
                 rex[id_entrie] += [aml_brw.id]
         for id_item, aml_ids in rex.iteritems():
             exp_brw = self.browse(cr, uid, id_item, context=context)
-            if exp_brw.state == 'paid' and not aml_ids:
-                res[id_item] = True
-            elif exp_brw.state == 'paid' and aml_ids:
-                exp_brw.write({'state': 'process'})
+            if exp_brw.state == 'paid':
+                aml_ids = [aml for aml in aml_ids if not
+                           exp_brw.company_id.currency_id.is_zero(
+                               aml.amount_residual)]
+                if not aml_ids:
+                    res[id_item] = True
+                else:
+                    exp_brw.write({'state': 'process'})
             elif exp_brw.state == 'process' and not aml_ids:
                 res[id_item] = True
                 exp_brw.write({'state': 'paid'})
@@ -193,7 +197,7 @@ class HrExpenseExpense(osv.Model):
             _get_payment_status, type='boolean',
             string = 'Expense Payment Status',
             store = {
-                _inherit: (lambda c, u, ids, cx: ids, ['aml_ids'], 50)
+                _inherit: (lambda self, c, u, ids, cx: ids, ['aml_ids'], 50)
             },),
 
 
@@ -508,6 +512,13 @@ class HrExpenseExpense(osv.Model):
 
             vals = {'date': date_post, 'period_id': period_id}
             exp.account_move_id.write(vals)
+            update_ok = exp.account_move_id.journal_id.update_posted
+            if not update_ok:
+                exp.account_move_id.journal_id.sudo().write({'update_posted':
+                                                             True})
+            exp.account_move_id.button_cancel()
+            exp.account_move_id.journal_id.sudo().write({'update_posted':
+                                                         update_ok})
             aml_obj.write(cr, uid, x_aml_ids, vals)
             for line_pair in full_rec + [ff]:
                 if not line_pair:
