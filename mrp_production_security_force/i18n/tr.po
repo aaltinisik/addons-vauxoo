@@ -18,5 +18,5 @@ msgstr ""
 #. module: mrp_production_security_force
 #: view:mrp.production:mrp_production_security_force.view_mrp_production_inherit_button_force_form
 msgid "Force Reservation"
-msgstr ""
+msgstr "Zorla Rezerve Et"
 

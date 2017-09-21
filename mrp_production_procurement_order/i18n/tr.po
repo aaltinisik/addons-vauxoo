@@ -18,21 +18,21 @@ msgstr ""
 #. module: mrp_production_procurement_order
 #: model:ir.model,name:mrp_production_procurement_order.model_mrp_production
 msgid "Manufacturing Order"
-msgstr ""
+msgstr "Üretim Emri"
 
 #. module: mrp_production_procurement_order
 #: model:ir.model,name:mrp_production_procurement_order.model_procurement_order
 msgid "Procurement"
-msgstr ""
+msgstr "Tedarik Emri"
 
 #. module: mrp_production_procurement_order
 #: field:procurement.order,production_created:0
 msgid "Production order"
-msgstr ""
+msgstr "Üretim Emri"
 
 #. module: mrp_production_procurement_order
 #: field:mrp.production,procurement_ids:0
 #: field:procurement.order,production_ids:0
 msgid "Production orders"
-msgstr ""
+msgstr "Üretim Emirleri"
 

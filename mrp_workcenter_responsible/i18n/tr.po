@@ -21,25 +21,25 @@ msgstr ""
 #: view:mrp.workcenter:mrp_workcenter_responsible.workcenter_reponsible_search_view_inherit
 #: field:mrp.workcenter,responsible_id:0
 msgid "Responsible"
-msgstr ""
+msgstr "Sorumlusu"
 
 #. module: mrp_workcenter_responsible
 #: help:mrp.production.workcenter.line,responsible_id:0
 msgid "Responsible person to carry out the work order. The responsible is the one for the work center associated. To change the responsible you need to change the work center responsible."
-msgstr ""
+msgstr "İş Emrini takip edecek sorumlu çalışan. Değiştirmek için ilgili iş merkezinin sorumlusunu değiştirin."
 
 #. module: mrp_workcenter_responsible
 #: help:mrp.workcenter,responsible_id:0
 msgid "Responsible person to perform the work center activities."
-msgstr ""
+msgstr "İş merkezi ile ilgili aktiviteleri gerçekleştirecek kullanıcı."
 
 #. module: mrp_workcenter_responsible
 #: model:ir.model,name:mrp_workcenter_responsible.model_mrp_workcenter
 msgid "Work Center"
-msgstr ""
+msgstr "İş Merkezi"
 
 #. module: mrp_workcenter_responsible
 #: model:ir.model,name:mrp_workcenter_responsible.model_mrp_production_workcenter_line
 msgid "Work Order"
-msgstr ""
+msgstr "İş Emri"
 
