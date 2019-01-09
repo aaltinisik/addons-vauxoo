@@ -7,7 +7,7 @@
 #    info Vauxoo (info@vauxoo.com)
 #    coded by: nhomar <nhomar@vauxoo.com>
 ############################################################################
-
+from itertools import zip_longest
 from odoo import api, fields, models
 
 
@@ -18,8 +18,10 @@ class AccountInvoiceRefund(models.TransientModel):
     def _onchange_amount_total(self):
         context = dict(self._context)
         inv_obj = self.env['account.invoice']
+        amount_total = 0
         for inv in inv_obj.browse(context.get('active_ids', self.active_id)):
-            self.amount_total += inv.amount_total * (self.percentage / 100)
+            amount_total += inv.amount_total * (self.percentage / 100)
+        self.amount_total = amount_total
 
     filter_refund = fields.Selection(
         selection_add=[('early_payment', 'Early payment: Prepare a discount '
@@ -35,29 +37,32 @@ class AccountInvoiceRefund(models.TransientModel):
 
     @api.multi
     def compute_refund(self, mode):
-        ctx = self._context.copy()
-        ctx.update({'active_ids': ctx.get('active_ids')[0]})
-        result = super(AccountInvoiceRefund,
-                       self.with_context(ctx)).compute_refund(mode)
+        result = super(AccountInvoiceRefund, self).compute_refund(mode)
         if mode != 'early_payment':
             return result
-        invoices = self.env['account.invoice'].browse(ctx.get('active_ids'))
+        invoices = self.env['account.invoice'].browse(
+            self._context.get('active_ids'))
         total = sum(invoices.mapped('amount_total'))
-        refund = invoices.browse(result.get('domain')[1][2])
-        refund.mapped('invoice_line_ids').unlink()
-        for inv in invoices:
+        refunds = invoices.browse(result.get('domain')[1][2])
+        refunds.mapped('invoice_line_ids').unlink()
+        for inv, refund in zip_longest(invoices, refunds, fillvalue=None):
+            if not inv or not refund:
+                break
             percentage = inv.amount_total / total
+            taxes = self.product_id.taxes_id
+            tax_perc = sum(taxes.mapped('amount'))
             self.env['account.invoice.line'].create({
                 'invoice_id': refund.id,
                 'product_id': self.product_id.id,
                 'name': self.product_id.name_get()[0][1],
                 'uom_id': self.product_id.uom_id.id,
-                'invoice_line_taxes_ids': [(6, 0,
-                                          self.product_id.taxes_id._ids)],
-                'price_unit': self.amount_total * percentage,
+                'invoice_line_tax_ids': [
+                    (6, 0, taxes._ids)],
+                'price_unit': self.amount_total * percentage / (1.0 + abs(tax_perc) / 100),
                 'account_id': self.product_id.property_account_income_id.id or
                               self.product_id.categ_id.property_account_income_categ_id.id
             })
+            refund.compute_taxes()
             refund.action_invoice_open()
             # Which is the aml to reconcile to (the receivable one)
             reconcile = refund.move_id.line_ids.filtered(
